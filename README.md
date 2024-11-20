@@ -19,7 +19,7 @@
 
 default.tf
 
-'''
+```
 
 terraform {
   required_providers {
@@ -35,8 +35,8 @@ provider "yandex" {
   service_account_key_file = "/home/evgenii/yandex_diplom/authorized_key.json"
 }
 
-'''
-
+```
+```
 Создаем файл конфигурации compute.tf.
 
 '''
@@ -131,7 +131,7 @@ output "external_ip_address_vm_1" {
 output "external_ip_address_vm_2" {
   value = yandex_compute_instance.vm-2.network_interface.0.nat_ip_address
 }
-'''
+```
 
 Запускаем команду terraform init
 
