@@ -201,6 +201,18 @@ curl -v 84.252.129.232:80
 
 В веб интерфейсе создаем новые узлы сети
 
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20%D0%BE%D1%82%202024-10-27%2017-35-53.png)
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20%D0%BE%D1%82%202024-10-27%2017-36-13.png)
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20%D0%BE%D1%82%202024-10-27%2017-37-06.png)
+
+Логи
+Cоздайте ВМ, разверните на ней Elasticsearch. Установите filebeat в ВМ к веб-серверам, настройте на отправку access.log, error.log nginx в Elasticsearch.
+Создайте ВМ, разверните на ней Kibana, сконфигурируйте соединение с Elasticsearch.
+
+Ответ:
+
+Запускаем Elasticsearch в докер контейнере.
+
 
 
 
