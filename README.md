@@ -221,5 +221,63 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 Заходим на веб интерфейс.
 
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20%D0%BE%D1%82%202024-10-27%2017-20-52.png)
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20%D0%BE%D1%82%202024-10-27%2017-20-5111.png)
+
+Создаем контейнер с Elasticsearch\Filebeat.
+
+```
+version: "3.9"
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/logs:/var/log/nginx
+
+  elasticsearch:
+    image: elasticsearch:7.17.6
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - node.store.allow_mmap=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  filebeat:
+    image: elastic/filebeat:8.6.2 #  Используем последнюю версию, которая вам подошла
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/local/filebeat/filebeat.yml
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk_default
+
+networks:
+  elk_default:
+```
+```
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+    - /var/log/nginx/error.log
+  tags: ["nginx"]
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "nginx-*"
+```
+
+Запускаем контейнер.
 
 
