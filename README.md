@@ -292,3 +292,118 @@ output.elasticsearch:
 Настройте ВМ с публичным адресом, в которой будет открыт только один порт — ssh. Эта вм будет реализовывать концепцию bastion host . Синоним "bastion host" - "Jump host". Подключение ansible к серверам web и Elasticsearch через данный bastion host можно сделать с помощью ProxyCommand . Допускается установка и запуск ansible непосредственно на bastion host.(Этот вариант легче в настройке)
 Исходящий доступ в интернет для ВМ внутреннего контура через NAT-шлюз.
 
+Создаем вм4
+
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/1%20%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%B5%D0%BC%20%D0%B2%D0%BC4%20%D0%BE%D0%BD%20%D0%B6%D0%B5%20%D0%B1%D0%B0%D1%81%D1%82%D0%B8%D0%BE%D0%BD%20%D1%85%D0%BE%D1%81%D1%82.png)
+
+Установка и настройка ssh сервера
+
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/2%20%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%B8%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20ssh%20%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0.png)
+
+Настройка файла config
+
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/3%20%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20%D1%84%D0%B0%D0%B9%D0%BB%D0%B0%20config.png)
+
+добавляем в файл строку для перенаправления в сеть.png
+
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/4%20%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%BB%D1%8F%D0%B5%D0%BC%20%D0%B2%20%D1%84%D0%B0%D0%B9%D0%BB%20%D1%81%D1%82%D1%80%D0%BE%D0%BA%D1%83%20%D0%B4%D0%BB%D1%8F%20%D0%BF%D0%B5%D1%80%D0%B5%D0%BD%D0%B0%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%B2%20%D1%81%D0%B5%D1%82%D1%8C.png)
+
+настройка NAT.png
+
+![1](https://github.com/Evgenii199130/Diplom/blob/main/scrin/5%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20NAT.png)
+
+
+
+Устанавливаем ансимбл
+
+```
+   sudo apt update
+   sudo apt install -y ansible
+```
+
+Создаем файл ansible.cfg
+```
+     [defaults]
+     transport = ssh
+
+     [ssh_connection]
+     ssh_args = -o ProxyCommand="ssh -W %h:%p bastion"
+```
+
+Создаем файл инвентаря например hosts.ini
+```
+     [webservers]
+     vm1
+     vm2
+
+     [logservers]
+     vm3
+```
+
+
+Настройка IP Forwarding:
+   На Bastion Host вам нужно включить пересылку IP-пакетов. Для этого откройте файл /etc/sysctl.conf и добавьте или раскомментируйте следующую строку:
+```
+ net.ipv4.ip_forward=1
+```
+Затем примените изменения:
+
+```
+   sudo sysctl -p
+```
+Настройка NAT:
+
+На Bastion Host, чтобы разрешить NAT. Интерфейс, который подключен к интернету, и внутренний интерфейс (например, eth1), который подключен к вашим внутренним серверам, выполните следующие команды:
+```
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+   sudo iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+   sudo iptables -A FORWARD -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+```
+Сохранение настроек iptables:
+```
+sudo iptables-save | sudo tee /etc/iptables/rules.v4
+```
+Настройка шлюза:
+   На каждом из внутренних серверов (vm1, vm2, vm3) вам нужно указать Bastion Host как шлюз. Для этого отредактируем файл /etc/network/interfaces или используйте команду ip route для добавления маршрута.
+```
+sudo ip route add default via 89.169.156.209
+```
+Резервное копирование
+Создайте snapshot дисков всех ВМ. Ограничьте время жизни snaphot в неделю. Сами snaphot настройте на ежедневное копирование.
+
+Создаем папку для резервных копий mkdir -p /path/to/backups.
+Создайте файл скрипта, например backup.sh:
+```
+#!/bin/bash
+
+   # Дата для имени файла
+   DATE=$(date +"%Y-%m-%d")
+
+   # Путь к диску.
+   DISK="/dev/vda"
+
+   # Папка для сохранения резервных копий
+   BACKUP_DIR="/path/to/backups"
+
+   # Создание снимка
+   dd if=$DISK of=$BACKUP_DIR/backup-$DATE.img bs=4M status=progress
+
+   # Удаление старых файлов резервных копий старше 7 дней
+   find $BACKUP_DIR -type f -name "*.img" -mtime +7 -exec rm {} \;
+```
+Делаем скрипт исролняемым.
+```
+chmod +x /path/to/backup.sh
+```
+Настройка cron для автоматического выполнения скрипта:
+
+Открываем crontab:
+crontab -e
+
+Добавляем задачу:
+   Вставляем строку, чтобы запускать резервное копирование каждый день в 2:00:
+
+```
+   0 2 * * * /path/to/backup.sh
+```
+Это означает, что скрипт будет выполняться каждый день в 2:00 ночи.
