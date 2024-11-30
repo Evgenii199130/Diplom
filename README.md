@@ -42,9 +42,26 @@ provider "yandex" {
 '''
 
 locals {
-  ssh_key_default = file("/home/evgenii/yandex_diplom/authorized_key.json")
+  ssh_key_default = file("./authorized_key.json")
 }
 
+resource "yandex_vpc_network" "network-1" {
+  name = "network1"
+}
+
+resource "yandex_vpc_subnet" "subnet-1" {
+  name           = "subnet1"
+  zone           = "ru-central1-a"
+  network_id     = yandex_vpc_network.network-1.id
+  v4_cidr_blocks = ["192.168.10.0/24"]
+}
+
+resource "yandex_vpc_subnet" "subnet-bastion" {
+  name           = "subnet-bastion"
+  zone           = "ru-central1-a"
+  network_id     = yandex_vpc_network.network-1.id
+  v4_cidr_blocks = ["192.168.20.0/24"]
+}
 
 resource "yandex_compute_disk" "boot-disk-1" {
   name     = "boot-disk-1"
@@ -62,7 +79,7 @@ resource "yandex_compute_disk" "boot-disk-2" {
   image_id = "fd87j6d92jlrbjqbl32q"
 }
 resource "yandex_compute_instance" "vm-1" {
-  name = "vm1"
+  name = "vm1_web-server"
   zone = "ru-central1-a"
   resources {
     cores  = 2
@@ -75,7 +92,6 @@ resource "yandex_compute_instance" "vm-1" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
   }
 
   metadata = {
@@ -84,7 +100,7 @@ resource "yandex_compute_instance" "vm-1" {
 }
 
 resource "yandex_compute_instance" "vm-2" {
-  name = "vm2"
+  name = "vm2_web-server"
   zone = "ru-central1-a"
   resources {
     cores  = 2
@@ -95,12 +111,42 @@ resource "yandex_compute_instance" "vm-2" {
     disk_id = yandex_compute_disk.boot-disk-2.id
   }
 
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd87j6d92jlrbjqbl32q"
+    }
+
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
   }
+
  metadata = {
     ssh-keys = "ubuntu:${var.ssh_key}"
+  }
+}
+
+resource "yandex_compute_instance" "bastion" {
+  name        = "vm4_bastion-host"
+  zone        = "ru-central1-a"
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd87j6d92jlrbjqbl32q"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet-bastion.id
+    nat       = true
+  }
+
+  metadata = {
+    ssh-keys = "ubuntu:${local.ssh_key_default}"
   }
 }
 
