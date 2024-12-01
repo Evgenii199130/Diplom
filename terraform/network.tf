@@ -13,16 +13,16 @@ resource "yandex_vpc_route_table" "inner-to-nat" {
   }
 }
 #----------------- subnet -----------------------------
-resource "yandex_vpc_subnet" "inner-nginx-1" {
-  name           = "nginx-1-subnet"
+resource "yandex_vpc_subnet" "inner-vm1" {
+  name           = "vm1_web-server-subnet"
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.newnet.id
   v4_cidr_blocks = ["10.0.1.0/28"]
   route_table_id = yandex_vpc_route_table.inner-to-nat.id
 }
 
-resource "yandex_vpc_subnet" "inner-nginx-2" {
-  name           = "nginx-2-subnet"
+resource "yandex_vpc_subnet" "inner-vm2" {
+  name           = "vm2_web-server-subnet"
   zone           = "ru-central1-b"
   network_id     = yandex_vpc_network.newnet.id
   v4_cidr_blocks = ["10.0.2.0/28"]
@@ -31,7 +31,7 @@ resource "yandex_vpc_subnet" "inner-nginx-2" {
 
 resource "yandex_vpc_subnet" "inner-services" {
   name           = "inner-services-subnet"
-  zone           = "ru-central1-b" #c
+  zone           = "ru-central1-b"
   network_id     = yandex_vpc_network.newnet.id
   v4_cidr_blocks = ["10.0.3.0/27"]
   route_table_id = yandex_vpc_route_table.inner-to-nat.id
@@ -39,7 +39,7 @@ resource "yandex_vpc_subnet" "inner-services" {
 
 resource "yandex_vpc_subnet" "public" {
   name           = "public-subnet"
-  zone           = "ru-central1-b" #c
+  zone           = "ru-central1-b"
   network_id     = yandex_vpc_network.newnet.id
   v4_cidr_blocks = ["10.0.4.0/27"]
 }
@@ -50,13 +50,13 @@ resource "yandex_alb_target_group" "new_tg_group" {
   name = "new-target-group"
 
   target {
-    ip_address = yandex_compute_instance.nginx-1.network_interface.0.ip_address
-    subnet_id  = yandex_vpc_subnet.inner-nginx-1.id
+    ip_address = yandex_compute_instance.vm1_web-server.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.inner-vm1_web-server.id
   }
 
   target {
-    ip_address = yandex_compute_instance.nginx-2.network_interface.0.ip_address
-    subnet_id  = yandex_vpc_subnet.inner-nginx-2.id
+    ip_address = yandex_compute_instance.vm2_web-server.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.inner-vm2_web-server.id
   }
 }
 
@@ -74,8 +74,8 @@ resource "yandex_alb_backend_group" "new_alb_bg" {
       panic_threshold = 90
     }
     healthcheck {
-      timeout             = "10s"
-      interval            = "2s"
+      timeout             = "20s"
+      interval            = "5s"
       healthy_threshold   = 10
       unhealthy_threshold = 15
       http_healthcheck {
@@ -116,7 +116,7 @@ resource "yandex_alb_load_balancer" "new_lb" {
 
   allocation_policy {
     location {
-      zone_id   = "ru-central1-b" #c
+      zone_id   = "ru-central1-b"
       subnet_id = yandex_vpc_subnet.inner-services.id
     }
   }
@@ -155,7 +155,7 @@ resource "yandex_vpc_security_group" "inner" {
   }
 }
 
-resource "yandex_vpc_security_group" "public-bastion" {
+resource "yandex_vpc_security_group" "public-bastion-host" {
   name       = "public-bastion-rules"
   network_id = yandex_vpc_network.newnet.id
 
@@ -179,8 +179,8 @@ resource "yandex_vpc_security_group" "public-bastion" {
   }
 }
 
-resource "yandex_vpc_security_group" "public-zabbix" {
-  name       = "public-zabbix-rules"
+resource "yandex_vpc_security_group" "public-vm5-zabbix" {
+  name       = "public-vm5-zabbix-rules"
   network_id = yandex_vpc_network.newnet.id
 
   ingress {
@@ -210,8 +210,8 @@ resource "yandex_vpc_security_group" "public-zabbix" {
   }
 }
 
-resource "yandex_vpc_security_group" "public-kibana" {
-  name       = "public-kibana-rules"
+resource "yandex_vpc_security_group" "public-vm6-kibana" {
+  name       = "public-vm6-kibana-rules"
   network_id = yandex_vpc_network.newnet.id
 
   ingress {
