@@ -1,3 +1,7 @@
+locals {
+ssh_key_default = file("./authorized_key.json")
+}
+
 resource "yandex_compute_disk" "boot-disk-1" {
   name     = "boot-disk-1"
   type     = "network-hdd"
