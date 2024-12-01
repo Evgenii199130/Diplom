@@ -3,7 +3,7 @@ resource "yandex_compute_snapshot_schedule" "default1" {
   description = "Ежедневные снимки, хранятся 7 дней"
 
   schedule_policy {
-    expression = "0 1 ? * *"
+    expression = "0 0 ? * *"
   }
 
   retention_period = "168h"
@@ -14,21 +14,21 @@ resource "yandex_compute_snapshot_schedule" "default1" {
   }
 
   disk_ids = [
-    "${yandex_compute_disk.disk-nginx1.id}",
-    "${yandex_compute_disk.disk-nginx2.id}",
-    "${yandex_compute_disk.disk-bastion.id}",
-    "${yandex_compute_disk.disk-zabbix.id}",
-    "${yandex_compute_disk.disk-elastic.id}",
-    "${yandex_compute_disk.disk-kibana.id}",
+    "${yandex_compute_disk.disk-vm1_web-server.id}",
+    "${yandex_compute_disk.disk-vm2_web-server.id}",
+    "${yandex_compute_disk.disk-vm4_bastion-host.id}",
+    "${yandex_compute_disk.disk-vm3-zabbix.id}",
+    "${yandex_compute_disk.disk-vm5-elastic.id}",
+    "${yandex_compute_disk.disk-vm6-kibana.id}",
   ]
 
   depends_on = [
-    yandex_compute_instance.nginx-1,
-    yandex_compute_instance.nginx-2,
-    yandex_compute_instance.bastion,
-    yandex_compute_instance.zabbix,
-    yandex_compute_instance.elastic,
-    yandex_compute_instance.kibana
+    yandex_compute_instance.vm1_web-server,
+    yandex_compute_instance.vm2_web-server,
+    yandex_compute_instance.vm4_bastion-host,
+    yandex_compute_instance.vm3-zabbix,
+    yandex_compute_instance.vm5-elastic,
+    yandex_compute_instance.vm6-kibana
   ]
 
 }
