@@ -1,20 +1,4 @@
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-  required_version = ">= 0.13"
-}
 
-provider "yandex" {
-  token     = "***"
-  cloud_id  = "***"
-  folder_id = "***"
-
-}
-
-#----------------- WWW -----------------------------
 resource "yandex_compute_instance" "nginx-1" {
   name                      = "vm-nginx-1"
   hostname                  = "nginx-1"
@@ -80,7 +64,6 @@ resource "yandex_compute_instance" "nginx-2" {
 }
 
 
-#----------------- bastion -----------------------------
 resource "yandex_compute_instance" "bastion" {
   name                      = "vm-bastion"
   hostname                  = "bastion"
@@ -115,7 +98,6 @@ resource "yandex_compute_instance" "bastion" {
 }
 
 
-#----------------- zabbix -----------------------------
 resource "yandex_compute_instance" "zabbix" {
   name                      = "vm-zabbix"
   hostname                  = "zabbix"
@@ -149,7 +131,6 @@ resource "yandex_compute_instance" "zabbix" {
   }
 }
 
-#----------------- elastic -----------------------------
 resource "yandex_compute_instance" "elastic" {
   name                      = "vm-elastic"
   hostname                  = "elastic"
@@ -182,7 +163,6 @@ resource "yandex_compute_instance" "elastic" {
   }
 }
 
-#----------------- kibana -----------------------------
 resource "yandex_compute_instance" "kibana" {
   name                      = "vm-kibana"
   hostname                  = "kibana"
