@@ -1,45 +1,45 @@
-resource "yandex_compute_disk" "disk-nginx1" {
-  name     = "disk-n-nginx1"
+resource "yandex_compute_disk" "boot-disk-1" {
+  name     = "boot-disk-1"
   type     = "network-hdd"
   zone     = "ru-central1-a"
-  image_id = "fd8a4icddonrspdp6839"
   size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
 
-resource "yandex_compute_disk" "disk-nginx2" {
-  name     = "disk-n-nginx2"
+resource "yandex_compute_disk" "boot-disk-2" {
+  name     = "boot-disk-2"
   type     = "network-hdd"
   zone     = "ru-central1-b"
-  image_id = "fd8hsei0au7hvctohsh9"
   size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
 
-resource "yandex_compute_disk" "disk-bastion" {
-  name     = "disk-n-bastion"
+resource "yandex_compute_disk" "disk-bastion_host" {
+  name     = "disk-bastion_host"
   type     = "network-hdd"
   zone     = "ru-central1-b"
-  image_id = "fd8svvs3unvqn83thrdk"
-  size     = 8
+  size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
 
 resource "yandex_compute_disk" "disk-zabbix" {
-  name     = "disk-n-zabbix"
+  name     = "disk-zabbix"
   type     = "network-hdd"
   zone     = "ru-central1-b"
-  image_id = "fd8svvs3unvqn83thrdk"
   size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
 
 resource "yandex_compute_disk" "disk-elastic" {
-  name     = "disk-n-elastic"
+  name     = "disk-elastic"
   type     = "network-hdd"
   zone     = "ru-central1-b"
-  image_id = "fd8svvs3unvqn83thrdk"
   size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
 
@@ -47,7 +47,7 @@ resource "yandex_compute_disk" "disk-kibana" {
   name     = "disk-n-kibana"
   type     = "network-hdd"
   zone     = "ru-central1-b"
-  image_id = "fd8svvs3unvqn83thrdk"
   size     = 10
+  image_id = "fd87j6d92jlrbjqbl32q"
 
 }
